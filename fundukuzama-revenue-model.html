@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fundukuzama — Revenue Sharing Model</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:   #0D2B55;
+    --teal:   #0E6655;
+    --gold:   #B7860D;
+    --gold-lt:#FDF3DC;
+    --teal-lt:#D4EEE9;
+    --navy-lt:#D6E4F5;
+    --white:  #FFFFFF;
+    --gray-50:#F4F4F2;
+    --gray-100:#E8E8E5;
+    --gray-400:#888780;
+    --gray-700:#3A3A3A;
+    --success: #0E6655;
+    --accent:  #185FA5;
+    --warn:    #854F0B;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  body {
+    font-family: var(--font);
+    background: var(--gray-50);
+    color: var(--gray-700);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo-planet { position: relative; width: 36px; height: 36px; }
+  .logo-planet svg { width: 36px; height: 36px; }
+  .logo-text { color: var(--white); }
+  .logo-text .name { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+  .logo-text .sub  { font-size: 10px; color: #82C4B0; letter-spacing: 2px; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: rgba(255,255,255,0.7); font-size: 13px; text-decoration: none; }
+  .nav-links a:hover { color: #fff; }
+
+  /* ── PAGE ── */
+  .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+  .page-header { margin-bottom: 40px; }
+  .page-header h1 { font-size: 26px; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; margin-bottom: 6px; }
+  .page-header p  { font-size: 14px; color: var(--gray-400); max-width: 500px; line-height: 1.6; }
+
+  .sec-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gray-400); margin-bottom: 16px;
+  }
+  .section { margin-bottom: 40px; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow { display: flex; align-items: stretch; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gray-100); }
+  .fnode { flex: 1; padding: 16px 12px; background: var(--white); }
+  .fnode + .fnode { border-left: 1px solid var(--gray-100); }
+  .farr { display: flex; align-items: center; justify-content: center; padding: 0 6px; background: var(--gray-50); border-top: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100); color: var(--gray-400); font-size: 16px; flex-shrink: 0; }
+  .ficon { font-size: 22px; margin-bottom: 7px; }
+  .ftit { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .fsub { font-size: 11px; color: var(--gray-400); line-height: 1.35; }
+
+  /* ── SPLIT CARDS ── */
+  .splits { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 18px; }
+  .scard { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-lg); padding: 18px; }
+  .spct { font-size: 32px; font-weight: 700; margin-bottom: 6px; transition: all 0.3s; }
+  .sname { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .sdesc { font-size: 12px; color: var(--gray-400); line-height: 1.45; }
+  .sbar { height: 5px; border-radius: 3px; margin-top: 14px; transition: width 0.4s ease; }
+
+  /* ── CALCULATOR ── */
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .sliders { display: flex; flex-direction: column; gap: 16px; }
+  .srow label { display: flex; justify-content: space-between; font-size: 13px; color: var(--gray-400); margin-bottom: 8px; }
+  .srow label b { color: var(--navy); font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: var(--navy); cursor: pointer; }
+  .results { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-lg); padding: 20px; }
+  .rrow { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--gray-50); }
+  .rrow:last-child { border-bottom: none; padding-bottom: 0; }
+  .rlbl { font-size: 13px; color: var(--gray-400); }
+  .rval { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .rval.big { font-size: 24px; color: var(--teal); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: var(--teal-lt);
+    border: 1px solid #9FE1CB;
+    border-left: 4px solid var(--teal);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    font-size: 13px;
+    color: var(--teal);
+    line-height: 1.55;
+  }
+  .callout b { font-weight: 700; }
+
+  /* ── PARTNERS ── */
+  .partners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pc { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-lg); padding: 14px; display: flex; gap: 10px; }
+  .pav { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .pname { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+  .prole { font-size: 11px; font-weight: 700; color: var(--gray-400); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pdesc { font-size: 12px; color: var(--gray-400); line-height: 1.4; }
+  .bdg { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; margin-top: 6px; }
+
+  /* ── STEPS ── */
+  .steps { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius-lg); overflow: hidden; }
+  .si { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--gray-50); }
+  .si:last-child { border-bottom: none; }
+  .snum { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0; margin-top: 1px; }
+  .stit { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .sdsc { font-size: 13px; color: var(--gray-400); line-height: 1.55; }
+
+  /* ── MINI LOGO SVG ── */
+  .planet-ring { animation: spin 12s linear infinite; transform-origin: 50% 50%; }
+  @keyframes spin { from { transform: rotate(-22deg); } to { transform: rotate(338deg); } }
+
+  /* ── FOOTER ── */
+  footer { background: var(--navy); color: rgba(255,255,255,0.5); text-align: center; padding: 20px; font-size: 12px; margin-top: 60px; }
+  footer b { color: #82C4B0; }
+
+  @media (max-width: 620px) {
+    .flow { flex-direction: column; }
+    .fnode+.fnode { border-left: none; border-top: 1px solid var(--gray-100); }
+    .farr { display: none; }
+    .splits, .calc-grid, .partners { grid-template-columns: 1fr; }
+    nav { padding: 12px 20px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="fundukuzama_store.html">
+    <svg width="36" height="36" viewBox="0 0 36 36">
+      <circle cx="18" cy="18" r="13" fill="#0E6655"/>
+      <ellipse cx="18" cy="18" rx="19" ry="5" fill="none" stroke="#F0C040" stroke-width="2.5" transform="rotate(-22 18 18)" opacity="0.9"/>
+      <circle cx="22" cy="12" r="2.5" fill="#F0C040" opacity="0.9"/>
+    </svg>
+    <div class="logo-text">
+      <div class="name">FUNDUKUZAMA</div>
+      <div class="sub">INVEST &amp; MARKETPLACE</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="fundukuzama_store.html#dashboard">My Investments</a>
+    <a href="fundukuzama_store.html#sme">Raise Capital</a>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <div class="page-header">
+    <h1>Revenue-Sharing Model</h1>
+    <p>Every sale you make automatically seeds your investment portfolio. Here's exactly how the money moves — and how you earn even when business is quiet.</p>
+  </div>
+
+  <!-- SECTION 1: FLOW -->
+  <div class="section">
+    <div class="sec-label">How money moves — from sale to passive income</div>
+    <div class="flow">
+      <div class="fnode">
+        <div class="ficon">💼</div>
+        <div class="ftit">Sale made</div>
+        <div class="fsub">Sale completed by the SME</div>
+      </div>
+      <div class="farr">›</div>
+      <div class="fnode">
+        <div class="ficon">⚡</div>
+        <div class="ftit">Auto-split triggered</div>
+        <div class="fsub">Revenue divided instantly at checkout</div>
+      </div>
+      <div class="farr">›</div>
+      <div class="fnode">
+        <div class="ficon">🏦</div>
+        <div class="ftit">Capital deployed</div>
+        <div class="fsub">Your % invested via FSP partner</div>
+      </div>
+      <div class="farr">›</div>
+      <div class="fnode">
+        <div class="ficon">📈</div>
+        <div class="ftit">Returns earned</div>
+        <div class="fsub">SME share + interest accumulates</div>
+      </div>
+      <div class="farr">›</div>
+      <div class="fnode">
+        <div class="ficon">💳</div>
+        <div class="ftit">Owner paid out</div>
+        <div class="fsub">Monthly — no sales required</div>
+      </div>
+    </div>
+
+    <div class="splits">
+      <div class="scard">
+        <div class="spct" style="color:var(--teal)" id="sp1">30%</div>
+        <div class="sname">Auto-invested</div>
+        <div class="sdesc">Deployed into SME revenue-share agreements and money market via FSP partner</div>
+        <div class="sbar" style="background:var(--teal);width:30%" id="sb1"></div>
+      </div>
+      <div class="scard">
+        <div class="spct" style="color:var(--accent)" id="sp2">50%</div>
+        <div class="sname">Store operations</div>
+        <div class="sdesc">Stock replenishment, rent, staff — the engine that keeps sales coming</div>
+        <div class="sbar" style="background:var(--accent);width:50%" id="sb2"></div>
+      </div>
+      <div class="scard">
+        <div class="spct" style="color:var(--gold)" id="sp3">20%</div>
+        <div class="sname">Owner take-home</div>
+        <div class="sdesc">Immediate profit drawn directly from each transaction</div>
+        <div class="sbar" style="background:var(--gold);width:20%" id="sb3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: CALCULATOR -->
+  <div class="section">
+    <div class="sec-label">Returns calculator — size it for your store</div>
+    <div class="calc-grid">
+      <div class="sliders">
+        <div class="srow">
+          <label>Monthly store revenue <b id="r-out">R 18,000</b></label>
+          <input type="range" min="2000" max="100000" step="500" value="18000" id="sl-rev" oninput="calc()">
+        </div>
+        <div class="srow">
+          <label>% auto-invested per sale <b id="p-out">30%</b></label>
+          <input type="range" min="5" max="50" step="1" value="30" id="sl-pct" oninput="calc()">
+        </div>
+        <div class="srow">
+          <label>Expected annual return <b id="a-out">12%</b></label>
+          <input type="range" min="6" max="22" step="1" value="12" id="sl-ann" oninput="calc()">
+        </div>
+        <div class="srow">
+          <label>Years investing <b id="y-out">2 yrs</b></label>
+          <input type="range" min="1" max="10" step="1" value="2" id="sl-yr" oninput="calc()">
+        </div>
+      </div>
+      <div class="results">
+        <div class="rrow"><span class="rlbl">Monthly invested</span><span class="rval" id="c-monthly">R 5,400</span></div>
+        <div class="rrow"><span class="rlbl">Portfolio after <span id="c-yrlbl">2</span> yrs</span><span class="rval" id="c-port">R 145,800</span></div>
+        <div class="rrow"><span class="rlbl">Monthly passive income</span><span class="rval big" id="c-pass">R 1,458</span></div>
+        <div class="rrow"><span class="rlbl">Total interest earned</span><span class="rval" id="c-int">R 16,152</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALLOUT -->
+  <div class="callout">
+    <span style="font-size:18px;flex-shrink:0">💡</span>
+    <div><b>No FSP license needed to start.</b> Fundukuzama partners with licensed FSPs — Franc, Stitch Money, EasyEquities — to handle the regulated investment side. You get the returns, they handle compliance. We apply for our own Category I FSP license once we have traction.</div>
+  </div>
+
+  <!-- SECTION 3: PARTNERS -->
+  <div class="section">
+    <div class="sec-label">FSP partner stack — who does what</div>
+    <div class="partners">
+      <div class="pc">
+        <div class="pav" style="background:var(--navy-lt);color:var(--navy)">ST</div>
+        <div>
+          <div class="prole">Payment splitting</div>
+          <div class="pname">Stitch Money</div>
+          <div class="pdesc">Splits payment at checkout in real time — routes 30% to investment wallet, 50% to operations, 20% to owner.</div>
+          <span class="bdg" style="background:var(--navy-lt);color:var(--navy)">Split at checkout</span>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="pav" style="background:var(--teal-lt);color:var(--teal)">FR</div>
+        <div>
+          <div class="prole">Auto-invest</div>
+          <div class="pname">Franc</div>
+          <div class="pdesc">Holds FSP license. Receives the 30% invest portion and deploys it into money market or unit trusts automatically.</div>
+          <span class="bdg" style="background:var(--teal-lt);color:var(--teal)">Money market</span>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="pav" style="background:#EEEDFE;color:#3C3489">EE</div>
+        <div>
+          <div class="prole">SME shares</div>
+          <div class="pname">EasyEquities</div>
+          <div class="pdesc">White-label API for the SME marketplace — fractional shares and ETF investments inside our platform.</div>
+          <span class="bdg" style="background:#EEEDFE;color:#3C3489">Fractional shares</span>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="pav" style="background:var(--gold-lt);color:var(--warn)">TF</div>
+        <div>
+          <div class="prole">SME listings</div>
+          <div class="pname">Thundafund</div>
+          <div class="pdesc">SA's leading debt crowdfunding. Standard Bank backed. Powers SME listings on the Fundukuzama marketplace.</div>
+          <span class="bdg" style="background:var(--gold-lt);color:var(--warn)">Crowdfunding</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: LAUNCH STEPS -->
+  <div class="section">
+    <div class="sec-label">Launch sequence — from idea to live platform</div>
+    <div class="steps">
+      <div class="si">
+        <div class="snum">1</div>
+        <div>
+          <div class="stit">Register a (Pty) Ltd</div>
+          <div class="sdsc">CIPC online — R175, 1–5 business days. Opens your business bank account and makes you a legal entity.</div>
+        </div>
+      </div>
+      <div class="si">
+        <div class="snum">2</div>
+        <div>
+          <div class="stit">Partner with Franc + Stitch Money</div>
+          <div class="sdsc">They hold the FSP licenses. You integrate their APIs to split payments at checkout and auto-invest the 30% — no FSCA application needed yet.</div>
+        </div>
+      </div>
+      <div class="si">
+        <div class="snum">3</div>
+        <div>
+          <div class="stit">Build and launch the combined platform</div>
+          <div class="sdsc">SME sales-linking + investment dashboard. The site design and logo are already done — wire to real APIs and go live.</div>
+        </div>
+      </div>
+      <div class="si">
+        <div class="snum">4</div>
+        <div>
+          <div class="stit">List 5–10 SMEs via revenue-share agreements</div>
+          <div class="sdsc">Not equity — a revenue-share contract. A business raises capital and pays back a % of monthly revenue. Keeps you outside securities law while you grow.</div>
+        </div>
+      </div>
+      <div class="si">
+        <div class="snum">5</div>
+        <div>
+          <div class="stit">Apply for Category I FSP once you have traction</div>
+          <div class="sdsc">R2,697 application fee. 2–6 month process. By then you have real user numbers, real returns, and a story the FSCA and future investors want to hear.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <b>FUNDUKUZAMA INVEST &amp; MARKETPLACE</b><br>
+  38 Everfield Grove, Newlands West, Durban · 067 971 1941 · simangabongwe@gmail.com<br><br>
+  "Let your store make money even on low sales."
+</footer>
+
+<script>
+function fmt(n){ return 'R ' + Math.round(n).toLocaleString('en-ZA'); }
+function calc(){
+  const rev = +document.getElementById('sl-rev').value;
+  const pct = +document.getElementById('sl-pct').value;
+  const ann = +document.getElementById('sl-ann').value;
+  const yr  = +document.getElementById('sl-yr').value;
+
+  document.getElementById('r-out').textContent = fmt(rev);
+  document.getElementById('p-out').textContent = pct + '%';
+  document.getElementById('a-out').textContent = ann + '%';
+  document.getElementById('y-out').textContent = yr + (yr === 1 ? ' yr' : ' yrs');
+  document.getElementById('c-yrlbl').textContent = yr;
+
+  const ops = Math.min(100 - pct, 70);
+  const own = 100 - pct - ops;
+
+  document.getElementById('sp1').textContent = pct + '%';
+  document.getElementById('sb1').style.width = pct + '%';
+  document.getElementById('sp2').textContent = ops + '%';
+  document.getElementById('sb2').style.width = ops + '%';
+  document.getElementById('sp3').textContent = own + '%';
+  document.getElementById('sb3').style.width = own + '%';
+
+  const m  = rev * (pct / 100);
+  const mr = ann / 100 / 12;
+  const mo = yr * 12;
+  let port = 0;
+  for (let i = 0; i < mo; i++) port = (port + m) * (1 + mr);
+
+  document.getElementById('c-monthly').textContent = fmt(m);
+  document.getElementById('c-port').textContent    = fmt(port);
+  document.getElementById('c-pass').textContent    = fmt(port * mr);
+  document.getElementById('c-int').textContent     = fmt(port - m * mo);
+}
+calc();
+</script>
+
+</body>
+</html>

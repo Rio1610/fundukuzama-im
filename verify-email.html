@@ -56,35 +56,29 @@
 </style>
 </head>
 <body>
-
 <div class="card" id="card">
   <div class="spinner"></div>
   <h1>Verifying your email…</h1>
   <p>Just a moment.</p>
 </div>
-
 <script>
 const API_BASE_URL = 'https://fundukuzama-backend.onrender.com';
-
 async function verify() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   const card = document.getElementById('card');
-
   if (!token) {
     card.innerHTML = `
       <div class="icon">⚠️</div>
       <h1>Missing verification link</h1>
       <p>This page needs a verification token in the URL. Check the link in your email again.</p>
-      <a class="btn" href="fundukuzama_store.html">Back to Fundukuzama</a>
+      <a class="btn" href="index.html">Back to Fundukuzama</a>
     `;
     return;
   }
-
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`);
     const data = await res.json();
-
     if (!res.ok) {
       card.innerHTML = `
         <div class="icon">⚠️</div>
@@ -94,17 +88,15 @@ async function verify() {
       `;
       return;
     }
-
     // Store session token so the store site knows you're signed in.
     localStorage.setItem('fundukuzama_token', data.token);
-
     card.innerHTML = `
       <div class="icon">✅</div>
       <h1>You're verified!</h1>
       <p>Your Fundukuzama account is active. Taking you to your dashboard…</p>
-      <a class="btn" href="fundukuzama_store.html#dashboard">Go to my dashboard</a>
+      <a class="btn" href="index.html#dashboard">Go to my dashboard</a>
     `;
-    setTimeout(() => { window.location.href = 'fundukuzama_store.html#dashboard'; }, 2000);
+    setTimeout(() => { window.location.href = 'index.html#dashboard'; }, 2000);
   } catch (err) {
     console.error('Verification error:', err);
     card.innerHTML = `
@@ -115,9 +107,7 @@ async function verify() {
     `;
   }
 }
-
 verify();
 </script>
-
 </body>
 </html>

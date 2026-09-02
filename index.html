@@ -820,20 +820,9 @@
     </div>
   </a>
 
-  <div class="nav-links">
-    <a href="#" onclick="showPage('store')">Home</a>
-    <a href="#" onclick="showPage('dashboard')">My Investments</a>
-    <a href="#" onclick="showPage('sme')">Raise Capital</a>
-    <a href="#" onclick="showPage('wallet')">Wallet</a>
-    <a href="#" onclick="showPage('settings')">Settings</a>
-  </div>
-
   <div class="nav-right">
-    <a id="nav-signup-link" href="fundukuzama-signup.html" style="font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign up</a>
-    <span id="nav-account-name" style="display:none;font-size:14px;color:var(--off-white);margin-right:12px;font-weight:600"></span>
-    <a id="nav-signout-link" href="#" onclick="doLogout()" style="display:none;font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign out</a>
-    <button class="btn-outline" onclick="showPage('wallet')">💳 Wallet</button>
-    <button class="btn-gold" onclick="showPage('dashboard')">My Investments</button>
+    <span id="nav-account-name" style="font-size:14px;color:var(--off-white);margin-right:16px;font-weight:600"></span>
+    <a id="nav-signout-link" href="#" onclick="doLogout()" style="font-size:14px;color:var(--gray);text-decoration:none">Sign out</a>
   </div>
 </nav>
 
@@ -1384,11 +1373,7 @@
   }
 
   function showAccountUI(business) {
-    document.getElementById('nav-signup-link').style.display = 'none';
-    document.getElementById('nav-signout-link').style.display = '';
-    const nameEl = document.getElementById('nav-account-name');
-    nameEl.style.display = '';
-    nameEl.textContent = business.businessName || business.firstName || 'Account';
+    document.getElementById('nav-account-name').textContent = business.businessName || business.firstName || 'Account';
   }
 
   async function loadAccount() {

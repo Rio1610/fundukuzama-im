@@ -829,8 +829,9 @@
   </div>
 
   <div class="nav-right">
-    <a href="fundukuzama-signup.html" style="font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign up</a>
-    <a href="#" onclick="doLogout()" style="font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign out</a>
+    <a id="nav-signup-link" href="fundukuzama-signup.html" style="font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign up</a>
+    <span id="nav-account-name" style="display:none;font-size:14px;color:var(--off-white);margin-right:12px;font-weight:600"></span>
+    <a id="nav-signout-link" href="#" onclick="doLogout()" style="display:none;font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign out</a>
     <button class="btn-outline" onclick="showPage('wallet')">💳 Wallet</button>
     <button class="btn-gold" onclick="showPage('dashboard')">My Investments</button>
   </div>
@@ -1044,7 +1045,9 @@
     <div class="dash-two">
       <div class="card">
         <div class="card-title">Portfolio performance <span>Last 6 months</span></div>
-        <canvas id="perfChart" height="200" role="img" aria-label="Portfolio growth chart"></canvas>
+        <div style="position:relative;height:220px;width:100%">
+          <canvas id="perfChart" role="img" aria-label="Portfolio growth chart"></canvas>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">Capital allocation</div>
@@ -1098,6 +1101,13 @@
         <div class="act-icon act-teal">🏙</div>
         <div class="act-body"><div class="act-title-text">New SME share purchased: TechFix Solutions</div><div class="act-time">Sat, 11:00</div></div>
         <div class="act-amount pos">+R 1,000</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-title">Your SME investments</div>
+      <div id="sme-holdings-list">
+        <div style="color:var(--gray);font-size:13px;padding:8px 0">No SME investments yet — browse the <a href="#" onclick="showPage('sme')" style="color:var(--gold)">Raise Capital</a> marketplace to get started.</div>
       </div>
     </div>
   </div>
@@ -1187,7 +1197,9 @@
 
     <div class="card" style="margin-top:28px">
       <div class="card-title">SME market performance vs savings account <span>12 months</span></div>
-      <canvas id="smeChart" height="180" role="img" aria-label="SME market performance chart"></canvas>
+      <div style="position:relative;height:220px;width:100%">
+        <canvas id="smeChart" role="img" aria-label="SME market performance chart"></canvas>
+      </div>
     </div>
   </div>
 </div>
@@ -1371,6 +1383,31 @@
     document.getElementById('login-overlay').style.display = show ? 'flex' : 'none';
   }
 
+  function showAccountUI(business) {
+    document.getElementById('nav-signup-link').style.display = 'none';
+    document.getElementById('nav-signout-link').style.display = '';
+    const nameEl = document.getElementById('nav-account-name');
+    nameEl.style.display = '';
+    nameEl.textContent = business.businessName || business.firstName || 'Account';
+  }
+
+  async function loadAccount() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      if (res.status === 401) {
+        clearToken();
+        showLoginOverlay(true);
+        return;
+      }
+      const data = await res.json();
+      showAccountUI(data);
+    } catch (err) {
+      console.error('Could not load account info:', err);
+    }
+  }
+
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -1406,6 +1443,7 @@
 
       setToken(data.token);
       showLoginOverlay(false);
+      await loadAccount();
       await loadWallet();
     } catch (err) {
       console.error('Login request failed:', err);
@@ -1440,6 +1478,7 @@
 
     if (getToken()) {
       showLoginOverlay(false);
+      await loadAccount();
       await loadWallet();
     } else {
       showLoginOverlay(true);
@@ -1456,7 +1495,7 @@
   }
 
   // ── Invest in an SME (from the marketplace)
-  function investInSME(name, btn) {
+  async function investInSME(name, btn) {
     const amount = prompt(`How much would you like to invest in ${name}? (ZAR)`, '500');
     if (amount === null) return;
     const val = parseFloat(amount);
@@ -1468,14 +1507,37 @@
       alert(`Insufficient wallet balance. Available: ${fmtZAR(walletBalance)}. Deposit more via the Wallet tab.`);
       return;
     }
-    walletBalance -= val;
-    updateWalletBalanceDisplay();
+
     const original = btn.textContent;
-    btn.textContent = '✓ Invested ' + fmtZAR(val);
+    btn.textContent = 'Investing…';
     btn.disabled = true;
-    btn.style.opacity = '0.7';
-    addWalletHistoryItem('Investment · ' + name, 'Just now', '-' + fmtZAR(val), false, '🏙', 'act-gold');
-    setTimeout(() => { btn.textContent = original; btn.disabled = false; btn.style.opacity = ''; }, 3000);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/wallet/invest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({ amount: val, smeName: name })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Investment failed.');
+        btn.textContent = original;
+        btn.disabled = false;
+        return;
+      }
+
+      walletBalance = parseFloat(data.balance);
+      updateWalletBalanceDisplay();
+      await loadWallet(); // refresh transaction history + dashboard holdings
+
+      btn.textContent = '✓ Invested ' + fmtZAR(val);
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; btn.style.opacity = ''; }, 3000);
+    } catch (err) {
+      console.error('Investment request failed:', err);
+      alert('Could not reach the server. Please try again.');
+      btn.textContent = original;
+      btn.disabled = false;
+    }
   }
 
   // ── Save settings
@@ -1539,11 +1601,46 @@
     const list = document.getElementById('wallet-history-list');
     list.innerHTML = '';
     transactions.forEach(tx => {
+      const when = new Date(tx.created_at).toLocaleString('en-ZA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      if (tx.type === 'sme_investment') {
+        addWalletHistoryItem('Investment · ' + tx.note, when, '-' + fmtZAR(parseFloat(tx.amount)), false, '🏙', 'act-gold');
+        return;
+      }
       const isDeposit = tx.type === 'deposit';
       const label = isDeposit ? 'Deposit · ' + methodLabel(tx.method) : 'Withdrawal · ' + methodLabel(tx.method);
-      const when = new Date(tx.created_at).toLocaleString('en-ZA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
       const sign = isDeposit ? '+' : '-';
       addWalletHistoryItem(label, when, sign + fmtZAR(parseFloat(tx.amount)), isDeposit, isDeposit ? '↓' : '↑', isDeposit ? 'act-teal' : 'act-blue');
+    });
+  }
+
+  // ── Render the "Your SME investments" card on the dashboard
+  function renderSmeHoldings(transactions) {
+    const list = document.getElementById('sme-holdings-list');
+    const investments = transactions.filter(tx => tx.type === 'sme_investment');
+
+    if (investments.length === 0) {
+      list.innerHTML = `<div style="color:var(--gray);font-size:13px;padding:8px 0">No SME investments yet — browse the <a href="#" onclick="showPage('sme')" style="color:var(--gold)">Raise Capital</a> marketplace to get started.</div>`;
+      return;
+    }
+
+    // Group by SME name so repeat investments in the same business combine into one line
+    const bySme = {};
+    investments.forEach(tx => {
+      const name = tx.note || 'Unknown SME';
+      bySme[name] = (bySme[name] || 0) + parseFloat(tx.amount);
+    });
+
+    list.innerHTML = '';
+    Object.entries(bySme).forEach(([name, total]) => {
+      const div = document.createElement('div');
+      div.className = 'activity-item';
+      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      div.innerHTML = `
+        <div class="act-icon act-gold">${initials}</div>
+        <div class="act-body"><div class="act-title-text">${name}</div><div class="act-time">Invested via Raise Capital</div></div>
+        <div class="act-amount">${fmtZAR(total)}</div>
+      `;
+      list.appendChild(div);
     });
   }
 
@@ -1562,6 +1659,7 @@
       walletBalance = parseFloat(data.balance) || 0;
       updateWalletBalanceDisplay();
       renderWalletHistory(data.transactions || []);
+      renderSmeHoldings(data.transactions || []);
     } catch (err) {
       console.error('Could not load wallet:', err);
     }

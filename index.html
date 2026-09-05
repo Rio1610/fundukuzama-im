@@ -1495,7 +1495,8 @@
     }
 
     const hash = window.location.hash.replace('#', '');
-    showPage(validPages.includes(hash) ? hash : 'store');
+    const fallback = getToken() ? 'dashboard' : 'store';
+    showPage(validPages.includes(hash) ? hash : fallback);
   });
 
   // ── Sector filter (SME marketplace)

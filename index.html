@@ -182,16 +182,17 @@
   .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
   /* ── PAGES ────────────────────────────────────────────── */
-  .page { display: none; padding-top: 124px; min-height: 100vh; position: relative; z-index: 1; }
+  .page { display: none; padding-top: 78px; min-height: 100vh; position: relative; z-index: 1; }
+  body.signed-in .page { padding-top: 124px; }
   .page.active { display: block; }
 
   /* ── HERO ─────────────────────────────────────────────── */
   .hero {
-    min-height: calc(100vh - 124px);
+    min-height: auto;
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
-    padding: 60px 80px;
+    padding: 24px 80px 60px;
     gap: 60px;
     position: relative;
     overflow: hidden;
@@ -321,7 +322,7 @@
   .stat-lbl { font-size: 11px; color: var(--gray); letter-spacing: 1px; margin-top: 2px; }
 
   /* ── SECTION STYLES ───────────────────────────────────── */
-  .section { padding: 80px; }
+  .section { padding: 32px 80px 80px; }
   .section-header { margin-bottom: 48px; }
   .section-eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
   .section-title { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; color: var(--white); line-height: 1.2; }
@@ -761,7 +762,7 @@
 
   @media (max-width: 768px) {
     nav { padding: 0 20px; }
-    .hero { grid-template-columns: 1fr; padding: 40px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 16px 24px 40px; }
     .hero-visual { display: none; }
     .section { padding: 40px 24px; }
     .categories, .products-grid, .invest-banner { padding-left: 24px; padding-right: 24px; }
@@ -1383,6 +1384,7 @@
 
   function updateNavForAuthState() {
     const loggedIn = !!getToken();
+    document.body.classList.toggle('signed-in', loggedIn);
     document.getElementById('nav-account-name').style.display = loggedIn ? '' : 'none';
     document.getElementById('nav-signout-link').style.display = loggedIn ? '' : 'none';
     document.getElementById('nav-signin-link').style.display = loggedIn ? 'none' : '';

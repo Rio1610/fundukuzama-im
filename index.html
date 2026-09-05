@@ -317,7 +317,7 @@
   }
 
   .stat-item {}
-  .stat-val { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--gold); }
+  .stat-val { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 28px; font-weight: 700; color: var(--gold); }
   .stat-lbl { font-size: 11px; color: var(--gray); letter-spacing: 1px; margin-top: 2px; }
 
   /* ── SECTION STYLES ───────────────────────────────────── */
@@ -509,7 +509,7 @@
   }
 
   .bmet { text-align: center; }
-  .bmet-val { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--gold); }
+  .bmet-val { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; color: var(--gold); }
   .bmet-lbl { font-size: 11px; color: var(--gray); letter-spacing: 0.5px; margin-top: 4px; }
 
   /* ── DASHBOARD PAGE ───────────────────────────────────── */
@@ -532,7 +532,7 @@
 
   .metric-icon { font-size: 20px; margin-bottom: 12px; }
   .metric-label { font-size: 12px; color: var(--gray); letter-spacing: 0.5px; margin-bottom: 6px; }
-  .metric-val { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--white); }
+  .metric-val { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; color: var(--white); }
   .metric-change { font-size: 12px; margin-top: 6px; }
   .pos { color: var(--teal-lt); }
   .neg { color: #E57373; }
@@ -566,7 +566,7 @@
   .act-body { flex: 1; }
   .act-title-text { font-weight: 500; color: var(--off-white); margin-bottom: 2px; }
   .act-time { font-size: 11px; color: var(--gray); }
-  .act-amount { font-weight: 600; white-space: nowrap; }
+  .act-amount { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   /* ── SME MARKET ───────────────────────────────────────── */
   .sme-grid {
@@ -593,7 +593,7 @@
 
   .sme-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
   .sme-stat-label { font-size: 10px; color: var(--gray); letter-spacing: 0.5px; text-transform: uppercase; }
-  .sme-stat-val { font-size: 16px; font-weight: 700; color: var(--white); margin-top: 2px; }
+  .sme-stat-val { font-size: 16px; font-weight: 700; color: var(--white); margin-top: 2px; font-variant-numeric: tabular-nums; }
 
   .sme-invest-btn {
     width: 100%;
@@ -681,7 +681,7 @@
     gap: 20px;
   }
   .wallet-balance-label { font-size: 13px; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-  .wallet-balance-val { font-family: 'Playfair Display', serif; font-size: 42px; color: var(--white); font-weight: 700; }
+  .wallet-balance-val { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 42px; color: var(--white); font-weight: 700; }
   .wallet-actions { display: flex; gap: 12px; }
   .wallet-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
   .wallet-tab {
@@ -733,9 +733,10 @@
   #login-overlay {
     position: fixed; inset: 0; z-index: 500;
     background: var(--navy-dk);
-    display: flex; align-items: center; justify-content: center;
+    display: none; align-items: center; justify-content: center;
     padding: 24px;
   }
+  #login-overlay.show { display: flex; }
   .login-card {
     max-width: 380px; width: 100%;
     background: rgba(255,255,255,0.03);
@@ -776,7 +777,8 @@
 
 <!-- ── LOGIN OVERLAY ────────────────────────────────────────────── -->
 <div id="login-overlay">
-  <div class="login-card">
+  <div class="login-card" style="position:relative">
+    <button onclick="showLoginOverlay(false)" aria-label="Close" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;line-height:1">×</button>
     <h1>Welcome back</h1>
     <div class="sub">Sign in to your Fundukuzama account.</div>
     <div id="login-msg"></div>
@@ -821,18 +823,19 @@
   </a>
 
   <div class="nav-right">
-    <span id="nav-account-name" style="font-size:14px;color:var(--off-white);margin-right:16px;font-weight:600"></span>
-    <a id="nav-signout-link" href="#" onclick="doLogout()" style="font-size:14px;color:var(--gray);text-decoration:none">Sign out</a>
+    <span id="nav-account-name" style="display:none;font-size:14px;color:var(--off-white);margin-right:16px;font-weight:600"></span>
+    <a id="nav-signout-link" href="#" onclick="doLogout()" style="display:none;font-size:14px;color:var(--gray);text-decoration:none;margin-right:4px">Sign out</a>
+    <a id="nav-signin-link" href="#" onclick="showLoginOverlay(true)" style="font-size:14px;color:var(--gray);text-decoration:none;margin-right:16px">Sign in</a>
+    <a id="nav-signup-btn" href="fundukuzama-signup.html" class="btn-gold" style="text-decoration:none;padding:9px 18px;font-size:14px">Sign up</a>
   </div>
 </nav>
 
 <!-- ── TAB BAR ──────────────────────────────────────────────────── -->
-<div class="tab-bar">
-  <div class="tab active" id="tab-store"      onclick="showPage('store')">🏠 Home</div>
-  <div class="tab"        id="tab-dashboard"  onclick="showPage('dashboard')">📈 My Investments</div>
-  <div class="tab"        id="tab-sme"        onclick="showPage('sme')">🏙 Raise Capital</div>
-  <div class="tab"        id="tab-wallet"     onclick="showPage('wallet')">💳 Wallet</div>
-  <div class="tab"        id="tab-settings"   onclick="showPage('settings')">⚙️ Settings</div>
+<div class="tab-bar" id="app-tab-bar" style="display:none">
+  <div class="tab" id="tab-dashboard"  onclick="showPage('dashboard')">📈 My Investments</div>
+  <div class="tab" id="tab-sme"        onclick="showPage('sme')">🏙 Raise Capital</div>
+  <div class="tab" id="tab-wallet"     onclick="showPage('wallet')">💳 Wallet</div>
+  <div class="tab" id="tab-settings"   onclick="showPage('settings')">⚙️ Settings</div>
 </div>
 
 
@@ -1368,8 +1371,23 @@
   function setToken(t) { localStorage.setItem('fundukuzama_token', t); }
   function clearToken() { localStorage.removeItem('fundukuzama_token'); }
 
+  // Pages that require a signed-in session. Home and the SME marketplace
+  // are public so visitors can see what Fundukuzama is before signing up —
+  // only the pages tied to an individual account need auth.
+  const authRequiredPages = ['dashboard', 'sme', 'wallet', 'settings'];
+  let pendingPage = null; // the page we were trying to reach when login was triggered
+
   function showLoginOverlay(show) {
-    document.getElementById('login-overlay').style.display = show ? 'flex' : 'none';
+    document.getElementById('login-overlay').classList.toggle('show', show);
+  }
+
+  function updateNavForAuthState() {
+    const loggedIn = !!getToken();
+    document.getElementById('nav-account-name').style.display = loggedIn ? '' : 'none';
+    document.getElementById('nav-signout-link').style.display = loggedIn ? '' : 'none';
+    document.getElementById('nav-signin-link').style.display = loggedIn ? 'none' : '';
+    document.getElementById('nav-signup-btn').style.display = loggedIn ? 'none' : '';
+    document.getElementById('app-tab-bar').style.display = loggedIn ? '' : 'none';
   }
 
   function showAccountUI(business) {
@@ -1383,11 +1401,12 @@
       });
       if (res.status === 401) {
         clearToken();
-        showLoginOverlay(true);
+        updateNavForAuthState();
         return;
       }
       const data = await res.json();
       showAccountUI(data);
+      updateNavForAuthState();
     } catch (err) {
       console.error('Could not load account info:', err);
     }
@@ -1430,6 +1449,8 @@
       showLoginOverlay(false);
       await loadAccount();
       await loadWallet();
+      showPage(pendingPage || 'dashboard');
+      pendingPage = null;
     } catch (err) {
       console.error('Login request failed:', err);
       msg.textContent = 'Could not reach the server. The backend may be waking up from sleep — wait 30 seconds and try again.';
@@ -1445,29 +1466,34 @@
     window.location.href = 'index.html';
   }
 
-  // ── Page navigation
+  // ── Page navigation — Home and Raise Capital are public; the rest need login
   function showPage(name) {
+    if (authRequiredPages.includes(name) && !getToken()) {
+      pendingPage = name;
+      showLoginOverlay(true);
+      return;
+    }
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
-    document.getElementById('tab-' + name).classList.add('active');
+    const tabEl = document.getElementById('tab-' + name);
+    if (tabEl) tabEl.classList.add('active');
     window.scrollTo(0, 0);
     history.replaceState(null, '', '#' + name);
   }
 
-  // ── Deep-link routing + auth gate on load
+  // ── Deep-link routing + auth state on load
   const validPages = ['store', 'dashboard', 'sme', 'wallet', 'settings'];
   window.addEventListener('DOMContentLoaded', async () => {
-    const hash = window.location.hash.replace('#', '');
-    if (validPages.includes(hash)) showPage(hash);
+    updateNavForAuthState();
 
     if (getToken()) {
-      showLoginOverlay(false);
       await loadAccount();
       await loadWallet();
-    } else {
-      showLoginOverlay(true);
     }
+
+    const hash = window.location.hash.replace('#', '');
+    showPage(validPages.includes(hash) ? hash : 'store');
   });
 
   // ── Sector filter (SME marketplace)
@@ -1637,6 +1663,7 @@
       });
       if (res.status === 401) {
         clearToken();
+        updateNavForAuthState();
         showLoginOverlay(true);
         return;
       }
